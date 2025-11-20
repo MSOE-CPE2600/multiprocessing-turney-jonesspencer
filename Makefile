@@ -22,3 +22,4 @@ mandelmovie: mandelmovie.o
 
 clean:
 	rm -rf $(OBJECTS) mandelmovie.o $(EXECUTABLE) mandelmovie *.d
+	rm *.jpg
