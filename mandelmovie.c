@@ -16,14 +16,21 @@ int main( int argc, char *argv[] )
 {
 	//default max children to 20
 	int maxchildren = 20;
+	int maxthreads = 20;
+	int benchmark = 0;
 	//set max children to input
 	int opt;
-	while ((opt = getopt(argc, argv, "p:")) != -1) {
+	while ((opt = getopt(argc, argv, "p:t:b:")) != -1) {
     	switch (opt) {
         case 'p':
             maxchildren = atoi(optarg);
             break;
-
+		case 't':
+			maxthreads = atoi(optarg);
+			break;
+		case 'b':
+			benchmark = atoi(optarg);
+			break;
         default:
             exit(1);
     	}
@@ -49,7 +56,9 @@ int main( int argc, char *argv[] )
 			outfile[0] = (frame / 10) + '0';
 			char scale [32] = {};
 			sprintf(scale,"%lf",0.002 * pow(0.95,frame));
-			execl("./mandel","./mandel","-o",outfile,"-m","4000","-s",scale,"-x","-0.743643887","-y","0.131825904",NULL);
+			char threads[64] = {};
+			sprintf(threads, "%d",maxthreads);
+			execl("./mandel","./mandel","-o",outfile,"-m","4000","-s",scale,"-x","-0.743643887","-y","0.131825904","-t",threads,NULL);
 			_exit(0);
 		}
 
@@ -65,7 +74,15 @@ int main( int argc, char *argv[] )
 	double elapsed =
     (end.tv_sec - start.tv_sec) +
     (end.tv_nsec - start.tv_nsec) / 1e9;
-
+	if(benchmark){
+	FILE *csv = fopen("mandel_runtimes.csv", "a");
+	if(csv == NULL){
+		perror("failed to open file");
+		return 1;
+	}
+	fprintf(csv, "%d,%d,%.6f\n",maxthreads, maxchildren, elapsed);
+    fclose(csv);
+    }
 	printf("Total runtime: %.6f seconds\n", elapsed);
 	return 0;
 }
